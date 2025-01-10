@@ -7,3 +7,9 @@ export interface UserRow extends RowDataPacket {
   image: string | null;
   emailVerified?: Date;
 }
+
+export interface SessionRow extends RowDataPacket {
+  session_token: string;
+  user_id: string;
+  expires: Date;
+}

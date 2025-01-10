@@ -1,5 +1,5 @@
-import { AdapterUser } from 'next-auth/adapters';
-import { UserRow } from './row';
+import { AdapterSession, AdapterUser } from 'next-auth/adapters';
+import { SessionRow, UserRow } from './row';
 
 export const mapToAdapterUser = (row: UserRow): AdapterUser => ({
   id: row.id,
@@ -7,4 +7,10 @@ export const mapToAdapterUser = (row: UserRow): AdapterUser => ({
   email: row.email,
   image: row.image ?? null,
   emailVerified: row.emailVerified ?? null,
+});
+
+export const mapToAdapterSession = (row: SessionRow): AdapterSession => ({
+  sessionToken: row.session_token,
+  userId: row.user_id,
+  expires: row.expires,
 });
