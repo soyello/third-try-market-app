@@ -10,7 +10,9 @@ const MySQLAdpater = {
       throw new Error('ID must be provided');
     }
     try {
-      const [rows] = await pool.query<UserRow[]>('SELECT id, name, email, image FROM users WHERE id = ?', [id]);
+      const [rows] = await pool.query<UserRow[]>('SELECT id, name, email, image, user_type FROM users WHERE id = ?', [
+        id,
+      ]);
       return rows?.[0] ? mapToAdapterUser(rows[0]) : null;
     } catch (error) {
       console.error('Error fetchin user by ID:', error);
@@ -22,7 +24,9 @@ const MySQLAdpater = {
       throw new Error('Email must be provided');
     }
     try {
-      const [rows] = await pool.query<UserRow[]>('SELECT id, name, email, image FROM users WHERe email=?', [email]);
+      const [rows] = await pool.query<UserRow[]>('SELECT id, name, email, image, user_type FROM users WHERE email=?', [
+        email,
+      ]);
       return rows?.[0] ? mapToAdapterUser(rows[0]) : null;
     } catch (error) {
       console.error('Error fetching user by email:', error);
@@ -30,21 +34,20 @@ const MySQLAdpater = {
     }
   },
   async createUser(user: Omit<AdapterUser, 'id' | 'emailVerified'>): Promise<AdapterUser> {
-    const { name, email, image } = user;
-    const [result] = await pool.query<ResultSetHeader>('INSERT INTO users (name, email, image) VALUES (?,?,?)', [
-      name,
-      email,
-      image,
-    ]);
-    return { id: result.insertId.toString(), name, email, image, emailVerified: null };
+    const { name, email, image, role } = user;
+    const [result] = await pool.query<ResultSetHeader>(
+      'INSERT INTO users (name, email, image, user_type) VALUES (?,?,?)',
+      [name, email, image, role]
+    );
+    return { id: result.insertId.toString(), name, email, image, emailVerified: null, role };
   },
   async updateUser(user: Partial<AdapterUser> & { id: string }): Promise<AdapterUser> {
-    const { id, name, email, image } = user;
+    const { id, name, email, image, role } = user;
     if (!id) {
       throw new Error('User Id is required for updating.');
     }
     try {
-      const updates = { name, email, image };
+      const updates = { name, email, image, user_type: role };
       const keys = Object.keys(updates).filter((key) => updates[key as keyof typeof updates] !== undefined);
       if (keys.length === 0) {
         throw new Error('No fields to update. Provide at laest one filed');
@@ -54,7 +57,7 @@ const MySQLAdpater = {
 
       await pool.query(`UPDATE users SET ${fields} WHERE id=?`, [...values, id]);
 
-      const [rows] = await pool.query<UserRow[]>('SELECT id, name, email, image FROM users WHERE id=?', [id]);
+      const [rows] = await pool.query<UserRow[]>('SELECT id, name, email, image, role FROM users WHERE id=?', [id]);
 
       if (!rows[0]) {
         throw new Error(`User with ID: ${id} not found after update.`);
@@ -81,7 +84,8 @@ const MySQLAdpater = {
           u.id AS id,
           u.name AS name,
           u.email AS email,
-          u.image AS image
+          u.image AS image,
+          u.user_type AS user_type
         FROM sessions AS s
         LEFT JOIN users AS u ON s.user_id = u.id
         WHERE s.session_token=?`,

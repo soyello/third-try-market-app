@@ -6,6 +6,7 @@ export interface UserRow extends RowDataPacket {
   email: string;
   image: string | null;
   emailVerified?: Date;
+  user_type: string;
 }
 
 export interface SessionRow extends RowDataPacket {
