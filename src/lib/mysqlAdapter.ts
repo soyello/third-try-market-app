@@ -1,22 +1,38 @@
 import { Adapter, AdapterSession, AdapterUser } from 'next-auth/adapters';
 import pool from './db';
-import { SessionRow, UserRow } from '@/helper/row';
-import { mapToAdapterSession, mapToAdapterUser } from '@/helper/mapper';
+import { ProductRow, SessionRow, UserRow } from '@/helper/row';
+import { mapToAdapterSession, mapToAdapterUser, mapToProducts } from '@/helper/mapper';
 import { ResultSetHeader } from 'mysql2';
-
-interface Product {
-  id: string;
-  title: string;
-  description: string;
-  imageSrc: string;
-  category: string;
-  latitude: number;
-  longitude: number;
-  price: number;
-  userId: string;
-}
+import { Product } from '@/helper/type';
+import { buildWhereClause } from '@/helper/buildWhereClause';
 
 const MySQLAdpater = {
+  async getProducts(query: Record<string, any> = {}): Promise<Product[]> {
+    const { where, values } = buildWhereClause(query, ['category', 'latitude', 'longitude']);
+    const sql = `
+      SELECT
+        id,
+        title,
+        description,
+        image_src,
+        category,
+        latitude,
+        longitude,
+        price,
+        user_id,
+        created_at,
+        updated_at
+      FROM products
+      ${where}
+      ORDER BY created_at DESC`;
+    try {
+      const [rows] = await pool.query<ProductRow[]>(sql, values);
+      return mapToProducts(rows);
+    } catch (error) {
+      console.error('Database query error:', { query, sql, values, error });
+      throw new Error('Error fetching products form the database');
+    }
+  },
   async createProduct({
     title,
     description,
@@ -26,7 +42,7 @@ const MySQLAdpater = {
     longitude,
     price,
     userId,
-  }: Omit<Product, 'id'>): Promise<Product> {
+  }: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> {
     if (!title || !description || !imageSrc || !category || !latitude || !longitude || !price || !userId) {
       throw new Error('All product fields are required');
     }
@@ -49,6 +65,8 @@ const MySQLAdpater = {
         longitude,
         price,
         userId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
     } catch (error) {
       console.error('Error creating product:', error);
