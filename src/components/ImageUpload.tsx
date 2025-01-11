@@ -3,6 +3,9 @@ import Image from 'next/image';
 import React from 'react';
 import { TbPhotoPlus } from 'react-icons/tb';
 
+const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
 interface ImageUploadProps {
   onChange: (value: string) => void;
   value: string;
@@ -10,11 +13,20 @@ interface ImageUploadProps {
 
 const ImageUpload = ({ onChange, value }: ImageUploadProps) => {
   const handleUpload = (result: any) => {
-    console.log('result', result);
-    onChange(result.info.secure_url);
+    alert('handleUpload called');
+    console.log('Upload result', result);
+    if (result.event === 'success') {
+      onChange(result.info.secure_url);
+    } else {
+      console.error('Upload failed or incomplete:', result);
+    }
   };
   return (
-    <CldUploadWidget onSuccess={handleUpload} uploadPreset={'ijijij'} options={{ maxFiles: 1 }}>
+    <CldUploadWidget
+      onSuccess={handleUpload}
+      uploadPreset={uploadPreset}
+      options={{ maxFiles: 1, clientAllowedFormats: ['jpg', 'png', 'gif'] }}
+    >
       {({ open }) => {
         return (
           <div
@@ -39,7 +51,13 @@ const ImageUpload = ({ onChange, value }: ImageUploadProps) => {
             <TbPhotoPlus size={50} />
             {value && (
               <div className='absolute inset-0 w-full h-full'>
-                <Image fill style={{ objectFit: 'cover' }} src={value} alt='' />
+                <Image
+                  className='absolute inset-0'
+                  layout='fill'
+                  style={{ objectFit: 'cover' }}
+                  src={value}
+                  alt='Upload Image'
+                />
               </div>
             )}
           </div>
