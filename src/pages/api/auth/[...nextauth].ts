@@ -23,19 +23,31 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials) return null;
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Invalid credentials');
+        }
+
         const user = await MySQLAdpater.getUserEmailWithPassword(credentials.email);
 
-        if (user && (await bcrypt.compare(credentials.password, user.hashed_password!))) {
+        if (user === null) {
+          console.log('회원가입이력이 없습니다.');
+        }
+
+        const isCorrectPassword = await bcrypt.compare(credentials.password, user?.hashed_password!);
+
+        if (!isCorrectPassword) {
+          throw new Error('Invalid credentials');
+        }
+
+        if (user && isCorrectPassword) {
           return {
             id: user.id,
             name: user.name,
             email: user.email,
             role: user.user_type,
           };
-        } else {
-          return null;
         }
+        return null;
       },
     }),
   ],
