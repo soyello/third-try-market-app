@@ -9,8 +9,11 @@ import React, { useContext, useEffect, useState } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import { KakaoContext } from '../_app';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/router';
+import axios from 'axios';
 
 const ProductUploadPage = () => {
+  const router = useRouter();
   const { isKakaoLoaded } = useContext(KakaoContext);
   const [shouldRenderMap, setShouldRenderMap] = useState(false);
 
@@ -49,7 +52,20 @@ const ProductUploadPage = () => {
 
   const KakaoMap = dynamic(() => import('../../components/KakaoMap'), { ssr: false });
 
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {};
+  const onSubmit: SubmitHandler<FieldValues> = (data) => {
+    setIsLoading(true);
+    axios
+      .post('/api/products', data)
+      .then((response) => {
+        router.push(`/products/${response.data.id}`);
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
 
   const setCustomValue = (id: string, value: any) => {
     setValue(id, value);
