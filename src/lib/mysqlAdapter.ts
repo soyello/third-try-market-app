@@ -5,6 +5,21 @@ import { mapToAdapterSession, mapToAdapterUser } from '@/helper/mapper';
 import { ResultSetHeader } from 'mysql2';
 
 const MySQLAdpater = {
+  async getUserEmailWithPassword(email: string): Promise<UserRow | null> {
+    if (!email) {
+      throw new Error('Email must be provided');
+    }
+    try {
+      const [rows] = await pool.query<UserRow[]>(
+        'SELECT id, name, email, image, user_type, hashed_password FROM users WHERE email=?',
+        [email]
+      );
+      return rows?.[0] || null;
+    } catch (error) {
+      console.error('Error fetching user by email:', error);
+      throw new Error('Failed to fetch user by email');
+    }
+  },
   async getUser(id: string): Promise<AdapterUser | null> {
     if (!id) {
       throw new Error('ID must be provided');
@@ -33,13 +48,15 @@ const MySQLAdpater = {
       throw new Error('Failed to fetch user by email');
     }
   },
-  async createUser(user: Omit<AdapterUser, 'id' | 'emailVerified'>): Promise<AdapterUser> {
-    const { name, email, image, role } = user;
+  async createUser(
+    user: Omit<AdapterUser, 'id' | 'image' | 'emailVerified' | 'role'> & { password: string }
+  ): Promise<AdapterUser> {
+    const { name, email, password } = user;
     const [result] = await pool.query<ResultSetHeader>(
-      'INSERT INTO users (name, email, image, user_type) VALUES (?,?,?)',
-      [name, email, image, role]
+      'INSERT INTO users (name, email, hashed_password) VALUES (?,?,?)',
+      [name, email, password]
     );
-    return { id: result.insertId.toString(), name, email, image, emailVerified: null, role };
+    return { id: result.insertId.toString(), name, email, image: null, emailVerified: null, role: 'User' };
   },
   async updateUser(user: Partial<AdapterUser> & { id: string }): Promise<AdapterUser> {
     const { id, name, email, image, role } = user;
