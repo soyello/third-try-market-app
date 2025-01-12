@@ -1,5 +1,5 @@
 import { AdapterSession, AdapterUser } from 'next-auth/adapters';
-import { ProductRow, ProductWithUserRow, SessionRow, UserRow } from './row';
+import { ProductRow, ProductWithUserRow, SessionRow, UserRow, UserconversationRow } from './row';
 import { Product } from './type';
 
 export const mapToAdapterUser = (row: UserRow): AdapterUser => ({
@@ -58,5 +58,38 @@ export const mapToProductWithUser = (row: ProductWithUserRow) => {
       image: row.userImage ?? null,
       role: row.userType,
     },
+  };
+};
+
+export const mapRowToUserconversation = (row: UserconversationRow) => {
+  return {
+    id: row.userId,
+    name: row.userName,
+    email: row.userEmail,
+    image: row.userImage,
+    conversationId: row.conversationId,
+    conversationName: row.conversationName,
+    conversationCreatedAt: row.conversationCreatedAt,
+    messageId: row.messageId,
+    messageText: row.messageText,
+    messageImage: row.messageImage,
+    messageCreatedAt: row.messageCreatedAt,
+    messageUpdatedAt: row.messageUpdatedAt,
+    sender: row.senderId
+      ? {
+          id: row.senderId,
+          name: row.senderName,
+          email: row.senderEmail,
+          image: row.senderImage,
+        }
+      : null,
+    receiver: row.receiverId
+      ? {
+          id: row.receiverId,
+          name: row.receiverName,
+          email: row.receiverEmail,
+          image: row.receiverImage,
+        }
+      : null,
   };
 };

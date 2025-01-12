@@ -40,3 +40,26 @@ export interface ProductUserRow extends RowDataPacket {
 }
 
 export type ProductWithUserRow = ProductRow & ProductUserRow;
+
+export interface UserconversationRow extends RowDataPacket {
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userImage: string;
+  conversationId: string | null;
+  conversationName: string | null;
+  conversationCreatedAt: string | null;
+  messageId: string | null;
+  messageText: string | null;
+  messageImage: string | null;
+  messageCreatedAt: string | null;
+  messageUpdatedAt: string | null;
+  senderId: string | null;
+  senderName: string | null;
+  senderEmail: string | null;
+  senderImage: string | null;
+  receiverId: string | null;
+  receiverName: string | null;
+  receiverEmail: string | null;
+  receiverImage: string | null;
+}

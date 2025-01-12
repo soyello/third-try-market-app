@@ -1,7 +1,13 @@
 import { Adapter, AdapterSession, AdapterUser } from 'next-auth/adapters';
 import pool from './db';
-import { ProductRow, ProductWithUserRow, SessionRow, UserRow } from '@/helper/row';
-import { mapToAdapterSession, mapToAdapterUser, mapToProductWithUser, mapToProducts } from '@/helper/mapper';
+import { ProductRow, ProductWithUserRow, SessionRow, UserRow, UserconversationRow } from '@/helper/row';
+import {
+  mapRowToUserconversation,
+  mapToAdapterSession,
+  mapToAdapterUser,
+  mapToProductWithUser,
+  mapToProducts,
+} from '@/helper/mapper';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { Product } from '@/helper/type';
 import { buildWhereClause } from '@/helper/buildWhereClause';
@@ -11,6 +17,50 @@ interface TotalItemRow extends RowDataPacket {
 }
 
 const MySQLAdpater = {
+  async getUserwithConversations() {
+    try {
+      const sql = `
+    SELECT
+      u.id AS userId,
+      u.name AS userName,
+      u.email AS userEmail,
+      u.image AS userImage,
+      c.id AS conversationId,
+      c.name AS conversationName,
+      c.created_at AS conversationCreatedAt,
+      m.id AS messageId,
+      m.text AS messageText,
+      m.image AS messageImage,
+      m.created_at AS messageCreatedAt,
+      m.updated_at AS messageUpdatedAt,
+      sender.id AS senderId,
+      sender.name AS senderName,
+      sender.email AS senderEmail,
+      sender.image AS senderImage,
+      receiver.id AS receiverId,
+      receiver.name AS receiverName,
+      receiver.email AS receiverEmail,
+      receiver.image AS receiverImage
+    FROM
+      users u
+    LEFT JOIN
+      conversations c ON u.id=c.sender_id OR u.id=c.receiver_id
+    LEFT JOIN
+      messages m ON c.ide=m.conversation_id
+    LEFT JOIN
+      users sender ON c.sender_id = sender.id
+    LEFT JOIN
+      users receiver ON c.receiver_id = receiver.id
+    ORDER BY
+      m.created_at ASC;
+      `;
+      const [rows] = await pool.query<UserconversationRow[]>(sql);
+      return rows.map(mapRowToUserconversation);
+    } catch (error) {
+      console.error('Database query error:', error);
+      throw new Error('Error fetching users with conversations.');
+    }
+  },
   async getProductWithUser(productId: string) {
     try {
       const sql = `
