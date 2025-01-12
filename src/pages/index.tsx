@@ -42,10 +42,12 @@ export default function Home({ products, currentUser: initialUser, page }: HomeP
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     const { req, res, query } = context;
+
+    console.log('이게 뭐지', query);
     const page = query.page ? Number(query.page) : 1;
 
     const session = await getSession(context);
-    console.log('Session:', session);
+
     const userResponse = await fetch('http://localhost:3000/api/currentUser', {
       headers: {
         cookie: req.headers.cookie || '',
