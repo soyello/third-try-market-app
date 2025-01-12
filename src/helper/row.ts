@@ -8,6 +8,7 @@ export interface UserRow extends RowDataPacket {
   emailVerified?: Date;
   user_type: string;
   hashed_password?: string;
+  favorite_ids: string[];
 }
 
 export interface SessionRow extends RowDataPacket {

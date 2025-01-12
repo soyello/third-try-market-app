@@ -5,8 +5,9 @@ import MySQLAdpater from './mysqlAdapter';
 export default async function getCurrentUser(req: any, res: any) {
   try {
     const session = await getServerSession(req, res, authOptions);
+
     if (!session?.user?.email) {
-      return null;
+      throw new Error('Unauthorized');
     }
     const currentUser = await MySQLAdpater.getUserByEmail(session.user.email);
 
