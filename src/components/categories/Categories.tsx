@@ -1,6 +1,8 @@
+import { useSearchParams } from 'next/navigation';
 import { GiBoatFishing, GiFoodTruck, GiIsland, GiWindmill } from 'react-icons/gi';
 import { MdOutlineVilla } from 'react-icons/md';
 import { TbBeach, TbMountain } from 'react-icons/tb';
+import CategoryBox from './CategoryBox';
 
 export const categories = [
   {
@@ -47,6 +49,23 @@ export const categories = [
   },
 ];
 const Categories = () => {
-  return <div></div>;
+  const params = useSearchParams();
+  const category = params?.get('category');
+
+  console.log(params?.get('category'));
+
+  return (
+    <div className='flex flex-row items-center justify-center pt-4 oveflow-x-auto'>
+      {categories.map((item) => (
+        <CategoryBox
+          key={item.label}
+          label={item.label}
+          path={item.path}
+          icon={item.icon}
+          selected={category === item.path}
+        />
+      ))}
+    </div>
+  );
 };
 export default Categories;

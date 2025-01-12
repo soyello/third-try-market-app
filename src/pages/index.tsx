@@ -1,6 +1,7 @@
 import Container from '@/components/Container';
 import EmptyState from '@/components/EmptyState';
 import FloatingButton from '@/components/FloatingButton';
+import Categories from '@/components/categories/Categories';
 import ProductCard from '@/components/product/ProductCard';
 import { GetServerSideProps } from 'next';
 import { getSession } from 'next-auth/react';
@@ -15,8 +16,9 @@ export default function Home({ products, currentUser: initialUser }: HomeProps) 
 
   return (
     <Container>
+      <Categories />
       {products.length === 0 ? (
-        <EmptyState />
+        <EmptyState showReset />
       ) : (
         <>
           <div className='grid grid-cols-1 gap-8 pt-12 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6'>
