@@ -20,8 +20,10 @@ type Serialized<T> = {
 
 export type SerializedProduct = Serialized<Product>;
 
+export type TConversationWithoutUsers = Omit<TConversation, 'users'>;
+
 export type TUserWithChat = AdapterUser & {
-  conversations: TConversation[];
+  conversations: TConversationWithoutUsers[];
 };
 
 export type TConversation = {
