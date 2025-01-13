@@ -11,7 +11,7 @@ const Avatar = ({ src }: AvatarProps) => {
       height={30}
       width={30}
       alt='Avatat'
-      src={src || 'https://via.placeholder.com/400x400?text=no+user+image'}
+      src={src || 'https://picsum.photos/300/300'}
       priority={true}
     />
   );

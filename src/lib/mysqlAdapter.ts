@@ -46,7 +46,7 @@ const MySQLAdpater = {
     LEFT JOIN
       conversations c ON u.id=c.sender_id OR u.id=c.receiver_id
     LEFT JOIN
-      messages m ON c.ide=m.conversation_id
+      messages m ON c.id=m.conversation_id
     LEFT JOIN
       users sender ON c.sender_id = sender.id
     LEFT JOIN
