@@ -20,16 +20,19 @@ type Serialized<T> = {
 
 export type SerializedProduct = Serialized<Product>;
 
-export type TConversationWithoutUsers = Omit<TConversation, 'users'>;
-
-export type TUserWithChat = AdapterUser & {
-  conversations: TConversationWithoutUsers[];
+export type TUser = AdapterUser & {
+  id: string;
+  name: string;
+  email: string;
+  image: string | null;
 };
 
 export type TConversation = {
   id: string;
+  participantIds: string[];
   messages: Message[];
-  users: AdapterUser[];
+  createdAt: Date;
+  updatedAt?: Date;
 };
 
 export type Message = {
@@ -41,4 +44,8 @@ export type Message = {
   conversationId: string;
   createdAt: Date;
   updatedAt?: Date;
+};
+
+export type TUserWithChat = TUser & {
+  conversations: TConversation[];
 };
