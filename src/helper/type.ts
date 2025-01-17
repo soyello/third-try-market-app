@@ -35,7 +35,7 @@ export type TConversation = {
   updatedAt?: Date;
 };
 
-export type Message = {
+export type TMessage = {
   id: string;
   text: string | null;
   image: string | null;

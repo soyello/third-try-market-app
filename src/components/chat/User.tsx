@@ -1,5 +1,5 @@
-import { TConversation, TUserWithChat } from '@/helper/type';
-import React from 'react';
+import { TConversation, TMessage, TUserWithChat } from '@/helper/type';
+import React, { useState } from 'react';
 import Avatar from '../Avatar';
 import { fromNow } from '@/helper/dayjs';
 
@@ -9,6 +9,7 @@ interface UserProps {
 }
 
 const User = ({ user, currentUserId }: UserProps) => {
+  const [messages, setMessages] = useState<TMessage[]>([]);
   const conversations = Array.isArray(user.conversations) ? user.conversations : [];
   const conversationWithCurrentUser = conversations.find((conversation: TConversation) =>
     conversation.participantIds.includes(currentUserId)
@@ -56,7 +57,9 @@ const User = ({ user, currentUserId }: UserProps) => {
           </p>
         )}
       </div>
-      <div>{latestMessage && <p>{fromNow(latestMessage.createdAt)}</p>}</div>
+      <div className='flex justify-end text-xs text-gray-500'>
+        {latestMessage && <p>{fromNow(latestMessage.createdAt)}</p>}
+      </div>
     </div>
   );
 };

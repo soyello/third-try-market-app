@@ -17,6 +17,12 @@ interface TotalItemRow extends RowDataPacket {
 }
 
 const MySQLAdpater = {
+  async getMessagesByConversationId(conversationId: string) {
+    const [rows] = await pool.query(`SELECT * FROM messages WHERE conversation_idd = ? ORDER BY created_at ASC`, [
+      conversationId,
+    ]);
+    return rows;
+  },
   async findOrCreateConversation(senderId: string, receiverId: string): Promise<number> {
     const sqlParams = [senderId, receiverId, receiverId, senderId];
     const findSQL = `
