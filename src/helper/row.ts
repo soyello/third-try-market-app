@@ -42,24 +42,38 @@ export interface ProductUserRow extends RowDataPacket {
 export type ProductWithUserRow = ProductRow & ProductUserRow;
 
 export interface UserconversationRow extends RowDataPacket {
-  userId: string;
-  userName: string;
-  userEmail: string;
-  userImage: string;
-  conversationId: string | null;
-  conversationName: string | null;
-  conversationCreatedAt: string | null;
-  messageId: string | null;
-  messageText: string | null;
-  messageImage: string | null;
-  messageCreatedAt: string | null;
-  messageUpdatedAt: string | null;
+  user: Pick<UserRow, 'id' | 'name' | 'email' | 'image'>;
+  conversation: {
+    id: string | null;
+    name: string | null;
+    createdAt: string | null;
+  } | null;
+  message: {
+    id: string | null;
+    text: string | null;
+    image: string | null;
+    createdAt: string | null;
+    updatedAt: string | null;
+    senderId: string | null;
+    receiverId: string | null;
+  };
+}
+
+export interface Message extends RowDataPacket {
+  messageId: string;
+  text: string | null;
+  image: string | null;
+  createdAt: Date;
+  updatedAt: Date | null;
   senderId: string | null;
-  senderName: string | null;
-  senderEmail: string | null;
-  senderImage: string | null;
   receiverId: string | null;
-  receiverName: string | null;
-  receiverEmail: string | null;
-  receiverImage: string | null;
+  conversationId: string;
+}
+
+export interface Conversation extends RowDataPacket {
+  conversationId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  messageIds: string[];
+  userIds: string[];
 }

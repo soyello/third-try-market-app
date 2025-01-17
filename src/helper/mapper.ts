@@ -63,32 +63,26 @@ export const mapToProductWithUser = (row: ProductWithUserRow) => {
 
 export const mapRowToUserconversation = (row: UserconversationRow) => {
   return {
-    id: row.userId,
-    name: row.userName,
-    email: row.userEmail,
-    image: row.userImage,
-    conversationId: row.conversationId,
-    conversationName: row.conversationName,
-    conversationCreatedAt: row.conversationCreatedAt,
-    messageId: row.messageId,
-    messageText: row.messageText,
-    messageImage: row.messageImage,
-    messageCreatedAt: row.messageCreatedAt,
-    messageUpdatedAt: row.messageUpdatedAt,
-    sender: row.senderId
+    id: row.user.id,
+    name: row.user.name,
+    email: row.user.email,
+    image: row.user.image,
+    conversation: row.conversation
       ? {
-          id: row.senderId,
-          name: row.senderName,
-          email: row.senderEmail,
-          image: row.senderImage,
+          id: row.conversation.id,
+          name: row.conversation.name,
+          createdAt: row.conversation.createdAt,
         }
       : null,
-    receiver: row.receiverId
+    message: row.message
       ? {
-          id: row.receiverId,
-          name: row.receiverName,
-          email: row.receiverEmail,
-          image: row.receiverImage,
+          id: row.message.id,
+          text: row.message.text,
+          image: row.message.image,
+          createdAt: row.message.createdAt,
+          updatedAt: row.message.updatedAt,
+          senderId: row.message.senderId,
+          receiverId: row.message.receiverId,
         }
       : null,
   };

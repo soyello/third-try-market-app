@@ -30,15 +30,15 @@ export type TUser = AdapterUser & {
 export type TConversation = {
   id: string;
   participantIds: string[];
-  messages: Message[];
+  messageIds: string[];
   createdAt: Date;
   updatedAt?: Date;
 };
 
 export type Message = {
   id: string;
-  text?: string;
-  image?: string;
+  text: string | null;
+  image: string | null;
   senderId: string;
   receiverId: string;
   conversationId: string;

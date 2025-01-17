@@ -9,7 +9,7 @@ import {
   mapToProducts,
 } from '@/helper/mapper';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
-import { Product } from '@/helper/type';
+import { Message, Product } from '@/helper/type';
 import { buildWhereClause } from '@/helper/buildWhereClause';
 
 interface TotalItemRow extends RowDataPacket {
@@ -17,42 +17,79 @@ interface TotalItemRow extends RowDataPacket {
 }
 
 const MySQLAdpater = {
+  async findOrCreateConversation(senderId: string, receiverId: string): Promise<number> {
+    const sqlParams = [senderId, receiverId, receiverId, senderId];
+    const findSQL = `
+      SELECT id FROM conversations
+      WHERE (sender_id = ? AND receiver_id = ?)
+      OR (sender_id = ? AND receiver_id = ?)
+      LIMIT 1;
+      `;
+    const createSQL = `
+      INSERT INTO conversations (sender_id, receiver_id) VALUES (?,?);`;
+
+    const [[conversation]] = await pool.query<RowDataPacket[]>(findSQL, sqlParams);
+    if (conversation) return conversation.id;
+
+    const [result] = await pool.query<ResultSetHeader>(createSQL, [senderId, receiverId]);
+    return result.insertId;
+  },
+  async createMessage(input: Omit<Message, 'id' | 'createdAt' | 'updatedAt'>): Promise<Message> {
+    const { text, image, senderId, receiverId, conversationId } = input;
+    const sql = `
+      INSERT INTO messages (text, image, sender_id, receiver_id, conversation_id, created_at)
+      VALUES (?,?,?,?,?,NOW());
+    `;
+    const sqlParams = [text || null, image || null, senderId, receiverId, conversationId];
+    const [result] = await pool.query<ResultSetHeader>(sql, sqlParams);
+
+    return {
+      id: String(result.insertId),
+      text: text || null,
+      image: image || null,
+      senderId,
+      receiverId,
+      conversationId: String(conversationId),
+      createdAt: new Date(),
+    };
+  },
   async getUserwithConversations() {
     try {
       const sql = `
     SELECT
-      u.id AS userId,
-      u.name AS userName,
-      u.email AS userEmail,
-      u.image AS userImage,
-      c.id AS conversationId,
-      c.name AS conversationName,
-      c.created_at AS conversationCreatedAt,
-      m.id AS messageId,
-      m.text AS messageText,
-      m.image AS messageImage,
-      m.created_at AS messageCreatedAt,
-      m.updated_at AS messageUpdatedAt,
-      sender.id AS senderId,
-      sender.name AS senderName,
-      sender.email AS senderEmail,
-      sender.image AS senderImage,
-      receiver.id AS receiverId,
-      receiver.name AS receiverName,
-      receiver.email AS receiverEmail,
-      receiver.image AS receiverImage
-    FROM
-      users u
-    LEFT JOIN
-      conversations c ON u.id=c.sender_id OR u.id=c.receiver_id
-    LEFT JOIN
-      messages m ON c.id=m.conversation_id
-    LEFT JOIN
-      users sender ON c.sender_id = sender.id
-    LEFT JOIN
-      users receiver ON c.receiver_id = receiver.id
-    ORDER BY
-      m.created_at ASC;
+      JSON_OBJECT(
+        'id',u.id,
+        'name', u.name,
+        'email', u.email,
+        'image', u.image
+      )AS user,
+
+      IF(
+        c.id IS NOT NULL,
+        JSON_OBJECT(
+          'id',c.id,
+          'name',c.name,
+          'createdAt',c.created_at
+        ),
+        NULL
+      ) AS conversation,
+
+      IF(
+        m.id IS NOT NULL,
+        JSON_OBJECT(
+          'id',m.id,
+          'text',m.text,
+          'image',m.image,
+          'createdAt',m.created_at,
+          'senderId',m.sender_id,
+          'receiverId',m.receiver_id
+        ),
+        NULL
+      ) AS message
+
+    FROM users u
+    LEFT JOIN conversations c ON u.id = c.sender_id OR u.id = c.receiver_id
+    LEFT JOIN messages m ON c.id = m.conversation_id;
       `;
       const [rows] = await pool.query<UserconversationRow[]>(sql);
       return rows.map(mapRowToUserconversation);

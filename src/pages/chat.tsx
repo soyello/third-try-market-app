@@ -49,7 +49,8 @@ const ChatPage = ({ currentUser }: ChatClientProps) => {
 
   const isLoading = !users && !error;
 
-  const currentUserWithChat = users?.find((user: TUserWithChat) => user.email === currentUser?.email);
+  const currentUserWithChat =
+    users && currentUser ? users.find((user: TUserWithChat) => user.email === currentUser?.email) : undefined;
 
   if (isLoading) {
     return <p>Loading...</p>;
